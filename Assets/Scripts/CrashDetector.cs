@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class CrashDetector : MonoBehaviour
 {
+        [SerializeField] private ParticleSystem deathEffect; // Particle effect to play when the player crashes
     void OnTriggerEnter2D(Collider2D other)
     {
         int layerIndex = LayerMask.NameToLayer("Floor");
@@ -9,7 +10,7 @@ public class CrashDetector : MonoBehaviour
         if (other.gameObject.layer == layerIndex)
         {
             Debug.Log("Player has crashed!");
-            //TODO: You can add additional logic here, such as restarting the level or displaying a crash message.
+            deathEffect.Play(); // Play the death effect particles
         }
     }
 }
