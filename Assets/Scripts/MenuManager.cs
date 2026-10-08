@@ -3,10 +3,10 @@ using UnityEngine.SceneManagement;
 
 public class MenuManager : MonoBehaviour
 {
-    public void GotoLevel(int level)
+    public void Play()
     {
         // Load the game scene Level1 when the Play button is clicked
-        SceneManager.LoadScene("Level" + level);
+        SceneManager.LoadScene("LevelSelector");
     }
     public void SelectCharacter()
     {
