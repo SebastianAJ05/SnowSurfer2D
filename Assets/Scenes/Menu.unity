@@ -285,7 +285,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1208023521}
         m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
-        m_MethodName: Play
+        m_MethodName: GoToSelectLevel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -493,7 +493,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1208023521}
         m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
-        m_MethodName: SelectCharacter
+        m_MethodName: GoToSelectCharacter
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
