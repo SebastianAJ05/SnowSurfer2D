@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         // Activate the selected character model 
-        transform.GetChild(0).GetChild(PlayerPrefs.GetInt("Character", 0)).gameObject.SetActive(true); 
+        transform.GetChild(PlayerPrefs.GetInt("Character", 0)).gameObject.SetActive(true); 
 
         moveAction = InputSystem.actions.FindAction("Move");
         rb = GetComponent<Rigidbody2D>();
