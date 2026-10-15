@@ -52,26 +52,4 @@ public class MenuManager : MonoBehaviour
     {
         SceneManager.LoadScene("LevelSelector");
     }
-
-    /// <summary>
-    /// Load the specified level scene when the Select Level button is clicked
-    /// </summary>
-    /// <param name="level"></param>
-    public void GoToLevel(int level)
-    {
-        SceneManager.LoadScene($"Level{level}");
-    }
-
-
-    /// <summary>
-    /// Store the selected character index in PlayerPrefs
-    /// </summary>
-    /// <param name="characterIndex"></param>
-    public void SelectCharacter(int characterIndex)
-    {        
-        PlayerPrefs.SetInt("SelectedCharacter", characterIndex);
-        PlayerPrefs.Save();
-        
-        SceneManager.LoadScene("Menu");
-    }
 }

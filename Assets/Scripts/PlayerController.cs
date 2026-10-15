@@ -5,61 +5,80 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float torqueAmount = 1f;
-    [SerializeField] private float boostSpeed = 20f;
-    [SerializeField] private ParticleSystem boostEffect; // Particle effect to play when the player boosts
-    [SerializeField] private ScoreManager scoreManager; // Reference to the ScoreManager script
-    float baseSpeed; // Store the base speed of the Surface Effector
+    [SerializeField] private float bootsSpeed = 35f;
+    [SerializeField] private ParticleSystem snowEffect;
+    [SerializeField] private ScoreManager scoreManager;
+    
+    SurfaceEffector2D surfaceEffector2D;
+    Rigidbody2D rb;
+
+    float baseSpeed;    
+    InputAction moveAction;
+    Vector2 moveInput;
+    float previousRotation; // Store the previous rotation of the player
+    float totalRotation; // Store the total rotation of the player
+    int flipCount; // Store the number of flips performed by the player
+
+    int activePowerUpsCount; // Track the number of active power-ups
+
+    
     private bool canControlPlayer = true; // Flag to control player input
 
     public bool CanControlPlayer { get => canControlPlayer; set => canControlPlayer = value; }
-    SurfaceEffector2D surfaceEffector;
-    InputAction moveAction;
-    Vector2 moveInput;
-    Rigidbody2D rb;
-    float previousRotation; // Store the previous rotation of the player for flip calculation
-    float currentRotation; // Store the current rotation of the player for flip calculation
-    float totalRotation; // Store the total rotation of the player for flip calculation
-    int flipCount; // Store the number of flips performed by the player
-    int activePowerUpsCount; // Track the number of active power-ups
 
-
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        transform.GetChild(0).GetChild(PlayerPrefs.GetInt("SelectedCharacter", 0)).gameObject.
-        SetActive(true); // Activate the selected character model
+        // Activate the selected character model 
+        transform.GetChild(0).GetChild(PlayerPrefs.GetInt("Character", 0)).gameObject.SetActive(true); 
+
         moveAction = InputSystem.actions.FindAction("Move");
         rb = GetComponent<Rigidbody2D>();
-        surfaceEffector = FindAnyObjectByType<SurfaceEffector2D>();
-        baseSpeed = surfaceEffector.speed; // Store the base speed of the Surface Effector
+        surfaceEffector2D = FindAnyObjectByType<SurfaceEffector2D>();
+        baseSpeed = surfaceEffector2D.speed; // Store the initial speed of the SurfaceEffector2D
     }
+    
 
+    // Update is called once per frame
     void Update()
     {
-        if (!canControlPlayer) return; // If player control is disabled, exit the method
-        PlayerTorque();
-        boostPlayer();
-        CalculateFlips();
-    }
-
-    private void CalculateFlips()
-    {
-        float currentRotation = transform.eulerAngles.z; // Get the current rotation of the player in degrees
-        totalRotation += Mathf.DeltaAngle(previousRotation, currentRotation); // Calculate the change in rotation since the last frame
-        if (Math.Abs(totalRotation) > 340)
-        {
-            flipCount++;
-            scoreManager.AddScore(flipCount * 100); // Update the score in the ScoreManager
-            totalRotation = 0; // Reset the total rotation after a flip is counted
-        }
-        previousRotation = currentRotation; // Update the previous rotation for the next frame
+        if (!canControlPlayer) return; // If player input is disabled, exit the method
+        
+        PlayerTorque();     
+        BoostPlayer();
+        CalculateFlips();        
+        
     }
 
     /// <summary>
-    /// Applies torque to the player based on input from the Move action.
+    /// Calculates the number of flips the player has performed based on their rotation 
+    /// </summary>
+    private void CalculateFlips()
+    {
+        // Get the current rotation of the player in degrees
+        float currentRotation = transform.rotation.eulerAngles.z; 
+        // Calculate the change in rotation since the last frame
+        totalRotation += Mathf.DeltaAngle(previousRotation, currentRotation); 
+        
+        if (Math.Abs(totalRotation)> 340)
+        {
+            flipCount++; // Increment the flip count if the total rotation exceeds 360 degrees
+            
+            scoreManager.AddScore(flipCount*100); 
+
+            totalRotation = 0; // Reset the total rotation for the next flip            
+        }
+
+        previousRotation = currentRotation; // Update the previous rotation for the next frame
+        
+    }
+
+    /// <summary>
+    /// Applies torque to the player based on the horizontal input from the Move action.
     /// </summary>
     void PlayerTorque()
     {
-        moveInput = moveAction.ReadValue<Vector2>();
+        moveInput = moveAction.ReadValue<Vector2>(); 
         if (moveInput.x < 0)
         {
             rb.AddTorque(torqueAmount);
@@ -68,42 +87,40 @@ public class PlayerController : MonoBehaviour
         {
             rb.AddTorque(-torqueAmount);
         }
+        
     }
-    void boostPlayer()
+
+    void BoostPlayer()
     {
         //Increase the player's speed when the up arrow key is pressed
-        //Surface Efector speed is increased to boostSpeed
+        //Surface Efector speed is increased to bootsSpeed
         if (moveInput.y > 0)
-        {
-            surfaceEffector.speed = boostSpeed;
-
+        {     
+            surfaceEffector2D.speed = bootsSpeed; 
         }
         else
-        {
-            surfaceEffector.speed = baseSpeed; //Normal speed
+        {         
+            surfaceEffector2D.speed = baseSpeed; // Return to normal speed
         }
     }
 
-    // Detects collision with the floor and plays the boost effect particles
+    // Detects when the player collides with the floor and plays the snow effect
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (moveInput.y > 0)
-        {
-            int layerIndex = LayerMask.NameToLayer("Floor");
-
-            if (collision.gameObject.layer == layerIndex)
-            {
-                boostEffect.Play(); // Play the boost effect particles
-            }
+        int layerIndex = LayerMask.NameToLayer("Floor");
+        if (collision.gameObject.layer == layerIndex)
+        {            
+            snowEffect.Play();            
         }
     }
+
+    // Detects when the player exits the collision with the floor and stops the snow effect
     void OnCollisionExit2D(Collision2D collision)
     {
         int layerIndex = LayerMask.NameToLayer("Floor");
-
         if (collision.gameObject.layer == layerIndex)
-        {
-            boostEffect.Stop(); // Stop the boost effect particles
+        {            
+            snowEffect.Stop();
         }
     }
 
@@ -113,11 +130,11 @@ public class PlayerController : MonoBehaviour
         if (powerUpData.PowerUpType == "Speed")
         {
             baseSpeed += powerUpData.PowerUpValue; // Increase the base speed by the power-up value
-            boostSpeed += powerUpData.PowerUpValue; // Increase the boost speed by the power-up value
-
+            bootsSpeed += powerUpData.PowerUpValue; // Increase the boots speed by the power-up value
         }
     }
-    public void DeactivePowerUp(PowerUpScriptableObject powerUpData)
+
+    public void DeactivatePowerUp(PowerUpScriptableObject powerUpData)
     {
         activePowerUpsCount--; // Decrement the count of active power-ups
         if (activePowerUpsCount == 0)
@@ -125,7 +142,7 @@ public class PlayerController : MonoBehaviour
             if (powerUpData.PowerUpType == "Speed")
             {
                 baseSpeed -= powerUpData.PowerUpValue; // Decrease the base speed by the power-up value
-                boostSpeed -= powerUpData.PowerUpValue; // Decrease the boost speed by the power-up value
+                bootsSpeed -= powerUpData.PowerUpValue; // Decrease the boots speed by the power-up value
             }
         }
     }

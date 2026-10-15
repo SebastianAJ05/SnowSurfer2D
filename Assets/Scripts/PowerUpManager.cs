@@ -5,7 +5,6 @@ public class PowerUpManager : MonoBehaviour
     [SerializeField] private PowerUpScriptableObject powerUpData;
 
     PlayerController playerController;
-
     SpriteRenderer powerUpSpriteRenderer;
 
     float timeLeft;
@@ -17,14 +16,14 @@ public class PowerUpManager : MonoBehaviour
         timeLeft = powerUpData.TimeLimit;
     }
 
-    /// <summary>
-    /// Counts down the time left for the power-up and resets it when it reaches zero.
-    /// </summary>
     private void Update()
     {
         CountDownPowerUpTime();
     }
 
+    /// <summary>
+    /// Counts down the time left for the power-up and resets it when it reaches zero.
+    /// </summary>
     private void CountDownPowerUpTime()
     {
         if (powerUpSpriteRenderer.enabled == false)
@@ -32,12 +31,14 @@ public class PowerUpManager : MonoBehaviour
             if (timeLeft > 0)
             {
                 timeLeft -= Time.deltaTime;
+
                 if (timeLeft <= 0)
                 {
-                    playerController.DeactivePowerUp(powerUpData);
-                }
+                    playerController.DeactivatePowerUp(powerUpData);
+                }            
             }
         }
+        
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -45,10 +46,9 @@ public class PowerUpManager : MonoBehaviour
         if (other.CompareTag("Player") && powerUpSpriteRenderer.enabled)
         {
             powerUpSpriteRenderer.enabled = false;
-            playerController.ApplyPowerUp(powerUpData);
-        }
-        {
-
+            playerController.ApplyPowerUp(powerUpData);            
         }
     }
+
+
 }
